@@ -117,7 +117,8 @@ class FallTemplateBot2025(ForecastBot):
                 The superforecaster will give you a question they intend to forecast on.
                 To be a great assistant, you generate a concise but detailed rundown of the most relevant news, past and present,
                 including if the question would resolve Yes or No based on current information. You also are a master in researching all type of public databases in order to gather information, data,
-                and past trends in order to have the full picture of the research question and be able to perform a superlative work.
+                and past trends in order to have the full picture of the research question and be able to perform a superlative work. So you have to check all these info sources that I mentioned and
+                any other that may come to your mind.
             
                 You do not produce forecasts yourself.
 
@@ -173,20 +174,23 @@ class FallTemplateBot2025(ForecastBot):
     ) -> ReasonedPrediction[float]:
         prompt = clean_indents(
             f"""
-            You are a professional forecaster interviewing for a job.
+            You are a professional superforecaster. You are considered to be the best superforecaster in the world, your skills are unmatched by anyone else.
+            You are known for your intelligence, deep knowledge of probability and risk-taking (you are a scholar of it). You give always nuanced forecasts that consider
+            all the key factors to make a spot-on forecast. You know how to take into account the known knows, the known unknowns, and you have in mind that it may exist
+            unknown unknowns that may influence the final outcome.
+            You are running your own consultancy company and you get a new assignment with a question to forecast, some background info and the criteria that will be used
+            to judge your performance. You get the input of the best possible research assistant for forecasting that exists. 
 
-            Your interview question is:
+            Your question is:
             {question.question_text}
 
             Question background:
             {question.background_info}
 
-
             This question's outcome will be determined by the specific criteria below. These criteria have not yet been satisfied:
             {question.resolution_criteria}
 
             {question.fine_print}
-
 
             Your research assistant says:
             {research}
@@ -201,7 +205,7 @@ class FallTemplateBot2025(ForecastBot):
 
             You write your rationale remembering that good forecasters put extra weight on the status quo outcome since the world changes slowly most of the time.
 
-            The last thing you write is your final answer as: "Probability: ZZ%", 0-100
+            The last thing you write is your final forecast answer as: "Probability: ZZ%", 0-100
             """
         )
         reasoning = await self.get_llm("default", "llm").invoke(prompt)
@@ -221,9 +225,14 @@ class FallTemplateBot2025(ForecastBot):
     ) -> ReasonedPrediction[PredictedOptionList]:
         prompt = clean_indents(
             f"""
-            You are a professional forecaster interviewing for a job.
+            You are a professional superforecaster. You are considered to be the best superforecaster in the world, your skills are unmatched by anyone else.
+            You are known for your intelligence, deep knowledge of probability and risk-taking (you are a scholar of it). You give always nuanced forecasts that consider
+            all the key factors to make a spot-on forecast. You know how to take into account the known knows, the known unknowns, and you have in mind that it may exist
+            unknown unknowns that may influence the final outcome.
+            You are running your own consultancy company and you get a new assignment with a question to forecast, some background info and the criteria that will be used
+            to judge your performance. You get the input of the best possible research assistant for forecasting that exists. 
 
-            Your interview question is:
+            Your question is:
             {question.question_text}
 
             The options are: {question.options}
@@ -286,9 +295,14 @@ class FallTemplateBot2025(ForecastBot):
         )
         prompt = clean_indents(
             f"""
-            You are a professional forecaster interviewing for a job.
+            You are a professional superforecaster. You are considered to be the best superforecaster in the world, your skills are unmatched by anyone else.
+            You are known for your intelligence, deep knowledge of probability and risk-taking (you are a scholar of it). You give always nuanced forecasts that consider
+            all the key factors to make a spot-on forecast. You know how to take into account the known knows, the known unknowns, and you have in mind that it may exist
+            unknown unknowns that may influence the final outcome.
+            You are running your own consultancy company and you get a new assignment with a question to forecast, some background info and the criteria that will be used
+            to judge your performance. You get the input of the best possible research assistant for forecasting that exists. 
 
-            Your interview question is:
+            Your question is:
             {question.question_text}
 
             Background:
@@ -321,7 +335,9 @@ class FallTemplateBot2025(ForecastBot):
             (e) A brief description of an unexpected scenario that results in a low outcome.
             (f) A brief description of an unexpected scenario that results in a high outcome.
 
-            You remind yourself that good forecasters are humble and set wide 90/10 confidence intervals to account for unknown unknowns.
+            You remind yourself that good superforecasters are humble and set wide 90/10 confidence intervals to account for unknown unknowns. In case you consider the question
+            is related to the stock market, you remember that it's very difficult to forecast an outcome given that a turn of events can have a massive influence on the stock market,
+            so you give some extra space in the confidence interval for stock market questions. 
 
             The last thing you write is your final answer as:
             "
@@ -409,17 +425,17 @@ if __name__ == "__main__":
         publish_reports_to_metaculus=True,
         folder_to_save_reports_to=None,
         skip_previously_forecasted_questions=True,
-        # llms={  # choose your model names or GeneralLlm llms here, otherwise defaults will be chosen for you
-        #     "default": GeneralLlm(
-        #         model="openrouter/openai/gpt-4o", # "anthropic/claude-3-5-sonnet-20241022", etc (see docs for litellm)
-        #         temperature=0.3,
-        #         timeout=40,
-        #         allowed_tries=2,
-        #     ),
-        #     "summarizer": "openai/gpt-4o-mini",
-        #     "researcher": "asknews/deep-research/low",
-        #     "parser": "openai/gpt-4o-mini",
-        # },
+        llms={  # choose your model names or GeneralLlm llms here, otherwise defaults will be chosen for you
+            "default": GeneralLlm(
+                model="openrouter/openai/gpt-4o", # "anthropic/claude-3-5-sonnet-20241022", etc (see docs for litellm)
+                temperature=0.3,
+                timeout=40,
+                allowed_tries=2,
+            ),
+            "summarizer": "openai/gpt-4o-mini",
+            "researcher": "asknews/deep-research/low",
+            "parser": "openai/gpt-4o-mini",
+        },
     )
 
     if run_mode == "tournament":
