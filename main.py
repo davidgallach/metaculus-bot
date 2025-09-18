@@ -433,7 +433,7 @@ if __name__ == "__main__":
                 allowed_tries=2,
             ),
             "summarizer": "openrouter/deepseek/deepseek-chat-v3.1:free", #"openai/gpt-4o-mini",
-            "researcher": "asknews/deep-research/low",
+            "researcher": "asknews/deep-research/medium-depth",
             "parser": "openrouter/deepseek/deepseek-chat-v3.1:free", #"openai/gpt-4o-mini",
         },
     )
