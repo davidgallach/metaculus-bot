@@ -142,16 +142,16 @@ class FallTemplateBot2025(ForecastBot):
                 research = await AskNewsSearcher().get_formatted_deep_research(
                     question.question_text,
                     sources=["asknews", "google"],
-                    search_depth=2,
-                    max_depth=4,
+                    search_depth=1,
+                    max_depth=2,
                     model="deepseek-basic",
                 )
             elif researcher == "asknews/deep-research/high-depth":
                 research = await AskNewsSearcher().get_formatted_deep_research(
                     question.question_text,
                     sources=["asknews", "google"],
-                    search_depth=4,
-                    max_depth=6,
+                    search_depth=2,
+                    max_depth=2,
                     model="deepseek-basic",
                 )
             elif researcher.startswith("smart-searcher"):
