@@ -171,7 +171,7 @@ class FallTemplateBot2025(ForecastBot):
             logger.info(f"Found Research for URL {question.page_url}:\n{research}")
             return research
 
-    async def stats_bot(self, question: MetaculusQuestion) -> str:
+    async def stats_agent(self, question: MetaculusQuestion) -> str:
         async with self._concurrency_limiter:
             research = ""
             stats_model = self.get_llm("stats_model")
