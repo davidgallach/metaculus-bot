@@ -173,17 +173,25 @@ class FallTemplateBot2025(ForecastBot):
 
     async def stats_agent(self, question: MetaculusQuestion) -> str:
         async with self._concurrency_limiter:
-            research = ""
-            stats_model = self.get_llm("stats_model")
+            stats_model = ""
+            stats_modeller = self.get_llm("stats_model")
 
             prompt = clean_indents(
                 f"""
-                You are a research assistant to a superforecaster. In fact, you are the best, most hard-working, dedicated research assistant to a superforecaster that has ever existed in the whole world.
-                The superforecaster will give you a question they intend to forecast on.
-                To be a great assistant, you generate a concise but detailed rundown of the most relevant news, past and present,
-                including if the question would resolve Yes or No based on current information. You also are a master in researching all type of public databases in order to gather information, data,
-                and past trends in order to have the full picture of the research question and be able to perform a superlative work. So you have to check all these info sources that I mentioned and
-                any other that may come to your mind.
+                You are a statistician, assisting to a superforecaster. In fact, you are an expert world-renowned statistician specialized in building statistic models that
+                help superforecasters in making their forecast. You are ane expert in all types of statistic modelling: normal, log-normal, Bayes, Extreme Value Analysis,
+                student-t, etc. 
+                The superforecaster will give you a question they intend to forecast on. You will hen:
+                1. Analyze the question, the resolution criteria and the fine print, based on the research done by the research assistant
+                to the superforecaster.
+                2. Decide whether it is useful to build a statistic model that may represent the problem that the question asks
+                 and that may help the superforecaster. If you decide that the problem to be solved is not correctectly represented by a 
+                 statistic model, you will conclude so and avoid continuing with the next steps.
+                3. If you decide that the problem to be solved can be represented by a statistic model you will:
+                    3a. Decide on which statistic model is the best to represent the problem.
+                    3b. Build the statistic model based on the data provided by the research assistant.
+                4. You will communicate the type of the model and the results to the superforecaster.
+        
 
                 You do not produce forecasts yourself.
 
@@ -194,6 +202,9 @@ class FallTemplateBot2025(ForecastBot):
                 {question.resolution_criteria}
 
                 {question.fine_print}
+                
+                The research done by the research assistant is:
+                {research}
                 """
             )
 
