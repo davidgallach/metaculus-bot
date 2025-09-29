@@ -106,7 +106,19 @@ class FallTemplateBot2025(ForecastBot):
     )
     _concurrency_limiter = asyncio.Semaphore(_max_concurrent_questions)
 
-
+    async def run_research(self, question: MetaculusQuestion) -> str:
+        async with self._concurrency_limiter:
+            research = ""
+            research = clean_indents(
+                f"""
+                I'm on holidays for a few days. Please do your own research following these instructions:
+                You generate a concise but detailed rundown of the most relevant news, past and present,
+                including if the question would resolve Yes or No based on current information. You also are a master in researching all type of public databases in order to gather information, data,
+                and past trends in order to have the full picture of the research question and be able to perform a superlative work. So you have to check all these info sources that I mentioned and
+                any other that may come to your mind.
+                """
+            )
+            return research
 
     # async def run_research(self, question: MetaculusQuestion) -> str:
     #     async with self._concurrency_limiter:
