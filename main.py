@@ -106,92 +106,92 @@ class FallTemplateBot2025(ForecastBot):
     )
     _concurrency_limiter = asyncio.Semaphore(_max_concurrent_questions)
 
-    # async def run_research(self, question: MetaculusQuestion) -> str:
-    #     async with self._concurrency_limiter:
-    #         research = ""
-    #         research = clean_indents(
-    #             f"""
-    #             I'm on holidays for a few days. Please do your own research following these instructions:
-    #             You generate a concise but detailed rundown of the most relevant news, past and present,
-    #             including if the question would resolve Yes or No based on current information. You also are a master in researching all type of public databases in order to gather information, data,
-    #             and past trends in order to have the full picture of the research question and be able to perform a superlative work. So you have to check all these info sources that I mentioned and
-    #             any other that may come to your mind.
-    #             """
-    #         )
-    #         return research
-
     async def run_research(self, question: MetaculusQuestion) -> str:
         async with self._concurrency_limiter:
             research = ""
-            researcher = self.get_llm("researcher")
-
-            prompt = clean_indents(
+            research = clean_indents(
                 f"""
-                You are a research assistant to a superforecaster. In fact, you are the best, most hard-working, dedicated research assistant to a superforecaster that has ever existed in the whole world.
-                The superforecaster will give you a question they intend to forecast on.
-                To be a great assistant, you generate a concise but detailed rundown of the most relevant news, past and present,
+                I'm on holidays for a few days. Please do your own research following these instructions:
+                You generate a concise but detailed rundown of the most relevant news, past and present,
                 including if the question would resolve Yes or No based on current information. You also are a master in researching all type of public databases in order to gather information, data,
                 and past trends in order to have the full picture of the research question and be able to perform a superlative work. So you have to check all these info sources that I mentioned and
                 any other that may come to your mind.
-
-                You do not produce forecasts yourself.
-
-                Question:
-                {question.question_text}
-
-                This question's outcome will be determined by the specific criteria below:
-                {question.resolution_criteria}
-
-                {question.fine_print}
                 """
             )
-
-            if isinstance(researcher, GeneralLlm):
-                research = await researcher.invoke(prompt)
-            elif researcher == "asknews/news-summaries":
-                research = await AskNewsSearcher().get_formatted_news_async(
-                    question.question_text
-                )
-            elif researcher == "asknews/deep-research/low-depth":
-                research = await AskNewsSearcher().get_formatted_deep_research(
-                    question.question_text,
-                    sources=["asknews"],
-                    search_depth=1,
-                    max_depth=1,
-                    model="deepseek-basic",
-                )
-            elif researcher == "asknews/deep-research/medium-depth":
-                research = await AskNewsSearcher().get_formatted_deep_research(
-                    question.question_text,
-                    sources=["asknews"],
-                    search_depth=1,
-                    max_depth=2,
-                    model="deepseek-basic",
-                )
-            elif researcher == "asknews/deep-research/high-depth":
-                research = await AskNewsSearcher().get_formatted_deep_research(
-                    question.question_text,
-                    sources=["asknews"],
-                    search_depth=2,
-                    max_depth=2,
-                    model="deepseek-basic",
-                )
-            elif researcher.startswith("smart-searcher"):
-                model_name = researcher.removeprefix("smart-searcher/")
-                searcher = SmartSearcher(
-                    model=model_name,
-                    temperature=0,
-                    num_searches_to_run=2,
-                    num_sites_per_search=10,
-                    use_advanced_filters=False,
-                )
-                research = await searcher.invoke(prompt)
-            elif not researcher or researcher == "None":
-                research = ""
-            else:
-                research = await self.get_llm("researcher", "llm").invoke(prompt)
-            logger.info(f"Found Research for URL {question.page_url}:\n{research}")
             return research
+    #
+    # async def run_research(self, question: MetaculusQuestion) -> str:
+    #     async with self._concurrency_limiter:
+    #         research = ""
+    #         researcher = self.get_llm("researcher")
+    #
+    #         prompt = clean_indents(
+    #             f"""
+    #             You are a research assistant to a superforecaster. In fact, you are the best, most hard-working, dedicated research assistant to a superforecaster that has ever existed in the whole world.
+    #             The superforecaster will give you a question they intend to forecast on.
+    #             To be a great assistant, you generate a concise but detailed rundown of the most relevant news, past and present,
+    #             including if the question would resolve Yes or No based on current information. You also are a master in researching all type of public databases in order to gather information, data,
+    #             and past trends in order to have the full picture of the research question and be able to perform a superlative work. So you have to check all these info sources that I mentioned and
+    #             any other that may come to your mind.
+    #
+    #             You do not produce forecasts yourself.
+    #
+    #             Question:
+    #             {question.question_text}
+    #
+    #             This question's outcome will be determined by the specific criteria below:
+    #             {question.resolution_criteria}
+    #
+    #             {question.fine_print}
+    #             """
+    #         )
+    #
+    #         if isinstance(researcher, GeneralLlm):
+    #             research = await researcher.invoke(prompt)
+    #         elif researcher == "asknews/news-summaries":
+    #             research = await AskNewsSearcher().get_formatted_news_async(
+    #                 question.question_text
+    #             )
+    #         elif researcher == "asknews/deep-research/low-depth":
+    #             research = await AskNewsSearcher().get_formatted_deep_research(
+    #                 question.question_text,
+    #                 sources=["asknews"],
+    #                 search_depth=1,
+    #                 max_depth=1,
+    #                 model="deepseek-basic",
+    #             )
+    #         elif researcher == "asknews/deep-research/medium-depth":
+    #             research = await AskNewsSearcher().get_formatted_deep_research(
+    #                 question.question_text,
+    #                 sources=["asknews"],
+    #                 search_depth=1,
+    #                 max_depth=2,
+    #                 model="deepseek-basic",
+    #             )
+    #         elif researcher == "asknews/deep-research/high-depth":
+    #             research = await AskNewsSearcher().get_formatted_deep_research(
+    #                 question.question_text,
+    #                 sources=["asknews"],
+    #                 search_depth=2,
+    #                 max_depth=2,
+    #                 model="deepseek-basic",
+    #             )
+    #         elif researcher.startswith("smart-searcher"):
+    #             model_name = researcher.removeprefix("smart-searcher/")
+    #             searcher = SmartSearcher(
+    #                 model=model_name,
+    #                 temperature=0,
+    #                 num_searches_to_run=2,
+    #                 num_sites_per_search=10,
+    #                 use_advanced_filters=False,
+    #             )
+    #             research = await searcher.invoke(prompt)
+    #         elif not researcher or researcher == "None":
+    #             research = ""
+    #         else:
+    #             research = await self.get_llm("researcher", "llm").invoke(prompt)
+    #         logger.info(f"Found Research for URL {question.page_url}:\n{research}")
+    #         return research
 
     async def _run_forecast_on_binary(
         self, question: BinaryQuestion, research: str
