@@ -451,14 +451,14 @@ if __name__ == "__main__":
         skip_previously_forecasted_questions=True,
         llms={  # choose your model names or GeneralLlm llms here, otherwise defaults will be chosen for you
             "default": GeneralLlm(
-                model="openrouter/deepseek/deepseek-chat-v3.1:free", #"openrouter/openai/gpt-4o", # "anthropic/claude-3-5-sonnet-20241022", etc (see docs for litellm)
+                model="openrouter/x-ai/grok-4-fast", #openrouter/deepseek/deepseek-chat-v3.1:free", #"openrouter/openai/gpt-4o", # "anthropic/claude-3-5-sonnet-20241022", etc (see docs for litellm)
                 temperature=0.3,
                 timeout=40,
                 allowed_tries=2,
             ),
-            "summarizer": "openrouter/deepseek/deepseek-chat-v3.1:free", #"openai/gpt-4o-mini",
+            "summarizer": "openrouter/x-ai/grok-4-fast", #"openai/gpt-4o-mini",
             "researcher": "asknews/deep-research/low-depth",
-            "parser": "openrouter/deepseek/deepseek-chat-v3.1:free", #"openai/gpt-4o-mini",
+            "parser": "openrouter/x-ai/grok-4-fast", #"openai/gpt-4o-mini",
         },
     )
 
