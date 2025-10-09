@@ -181,8 +181,8 @@ class FallTemplateBot2025(ForecastBot):
                 searcher = SmartSearcher(
                     model=model_name,
                     temperature=0,
-                    num_searches_to_run=2,
-                    num_sites_per_search=10,
+                    num_searches_to_run=1,
+                    num_sites_per_search=5,
                     use_advanced_filters=False,
                 )
                 research = await searcher.invoke(prompt)
@@ -457,7 +457,7 @@ if __name__ == "__main__":
                 allowed_tries=2,
             ),
             "summarizer": "openrouter/x-ai/grok-4-fast", #"openai/gpt-4o-mini",
-            "researcher": "asknews/deep-research/low-depth",
+            "researcher": "smart-searcher/deepseek-basic", #asknews/deep-research/low-depth",
             "parser": "openrouter/x-ai/grok-4-fast", #"openai/gpt-4o-mini",
         },
     )
