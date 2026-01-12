@@ -1,20 +1,28 @@
 import argparse
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
+import dotenv
 from typing import Literal
+
 
 from forecasting_tools import (
     AskNewsSearcher,
     BinaryQuestion,
     ForecastBot,
     GeneralLlm,
-    MetaculusApi,
+    MetaculusClient,
     MetaculusQuestion,
     MultipleChoiceQuestion,
     NumericDistribution,
     NumericQuestion,
+    DateQuestion,
+    DatePercentile,
     Percentile,
+    ConditionalQuestion,
+    ConditionalPrediction,
+    PredictionTypes,
+    PredictionAffirmed,
     BinaryPrediction,
     PredictedOptionList,
     ReasonedPrediction,
@@ -23,23 +31,24 @@ from forecasting_tools import (
     structure_output,
 )
 
+dotenv.load_dotenv()
 logger = logging.getLogger(__name__)
 
 
-class FallTemplateBot2025(ForecastBot):
+class SpringTemplateBot2026(ForecastBot):
     """
-    This is a copy of the template bot for Fall 2025 Metaculus AI Tournament.
-    This bot is what is used by Metaculus in our benchmark, but is also provided as a template for new bot makers.
-    This template is given as-is, and though we have covered most test cases
-    in forecasting-tools it may be worth double checking key components locally.
+    This is the template bot for Spring 2026 Metaculus AI Tournament.
+    This is a copy of what is used by Metaculus to run the Metac Bots in our benchmark, provided as a template for new bot makers.
+    This template is given as-is, and is use-at-your-own-risk.
+    We have covered most test cases in forecasting-tools it may be worth double checking key components locally.
+    So far our track record has been 1 mentionable bug per season (affecting forecasts for 1-2% of total questions)
 
-    Main changes since Q2:
-    - An LLM now parses the final forecast output (rather than programmatic parsing)
-    - Added resolution criteria and fine print explicitly to the research prompt
-    - Previously in the prompt, nothing about upper/lower bound was shown when the bounds were open. Now a suggestion is made when this is the case.
-    - Support for nominal bounds was added (i.e. when there are discrete questions and normal upper/lower bounds are not as intuitive)
+    Main changes since Fall:
+    - Additional prompting has been added to numeric questions to emphasize putting pecentile values in the correct order.
+    - Support for conditional and date questions has been added
+    - Note: Spring AIB will not use date/conditional questions, so these are only for forecasting on the main site as you wish.
 
-    The main entry point of this bot is `forecast_on_tournament` in the parent class.
+    The main entry point of this bot is `bot.forecast_on_tournament(tournament_id)` in the parent class.
     See the script at the bottom of the file for more details on how to run the bot.
     Ignoring the finer details, the general flow is:
     - Load questions from Metaculus
@@ -50,13 +59,16 @@ class FallTemplateBot2025(ForecastBot):
         - Submit prediction (if publish_reports_to_metaculus is True)
     - Return a list of ForecastReport objects
 
-    Only the research and forecast functions need to be implemented in ForecastBot subclasses,
-    though you may want to override other ones.
-    In this example, you can change the prompts to be whatever you want since,
-    structure_output uses an LLMto intelligently reformat the output into the needed structure.
+    Alternatively, you can use the MetaculusClient to make a custom filter of questions to forecast on
+    and forecast them with `bot.forecast_questions(questions)`
 
-    By default (i.e. 'tournament' mode), when you run this script, it will forecast on any open questions for the
-    MiniBench and Seasonal AIB tournaments. If you want to forecast on only one or the other, you can remove one
+    Only the research and forecast functions need to be implemented in ForecastBot subclasses,
+    though you may want to override other ForecastBot functions.
+    In this example, you can change the prompts to be whatever you want since,
+    structure_output uses an LLM to intelligently reformat the output into the needed structure.
+
+    By default (i.e. 'tournament' mode), when you run this script, it will forecast on any open questions in the
+    primary bot tournament and MiniBench. If you want to forecast on only one or the other, you can remove one
     of them from the 'tournament' mode code at the bottom of the file.
 
     You can experiment with what models work best with your bot by using the `llms` parameter when initializing the bot.
@@ -66,13 +78,13 @@ class FallTemplateBot2025(ForecastBot):
         ...
         llms={  # choose your model names or GeneralLlm llms here, otherwise defaults will be chosen for you
             "default": GeneralLlm(
-                model="openrouter/openai/gpt-4o", # "anthropic/claude-3-5-sonnet-20241022", etc (see docs for litellm)
+                model="openrouter/openai/gpt-4o", # "anthropic/claude-sonnet-4-20250514", etc (see docs for litellm)
                 temperature=0.3,
                 timeout=40,
                 allowed_tries=2,
             ),
             "summarizer": "openai/gpt-4o-mini",
-            "researcher": "asknews/deep-research/low",
+            "researcher": "asknews/news-summaries",
             "parser": "openai/gpt-4o-mini",
         },
     )
@@ -81,10 +93,10 @@ class FallTemplateBot2025(ForecastBot):
     Then you can access the model in custom functions like this:
     ```python
     research_strategy = self.get_llm("researcher", "model_name"
-    if research_strategy == "asknews/deep-research/low":
+    if research_strategy == "asknews/news-summaries":
         ...
     # OR
-    summarizer = await self.get_llm("summarizer", "model_name").invoke(prompt)
+    summarizer = await self.get_llm("summarizer", "llm").invoke(prompt)
     # OR
     reasoning = await self.get_llm("default", "llm").invoke(prompt)
     ```
@@ -105,6 +117,9 @@ class FallTemplateBot2025(ForecastBot):
         1  # Set this to whatever works for your search-provider/ai-model rate limits
     )
     _concurrency_limiter = asyncio.Semaphore(_max_concurrent_questions)
+    _structure_output_validation_samples = 2
+
+    ##################################### RESEARCH #####################################
 
     async def run_research(self, question: MetaculusQuestion) -> str:
         async with self._concurrency_limiter:
